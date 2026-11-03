@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Tasks - 할 일 관리 대시보드</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- 상단 글로벌 네비게이션 헤더 -->
+    <header class="app-header">
+      <div class="header-brand">
+        <h1 class="app-title">My Tasks</h1>
+        <span class="app-subtitle">스마트 태스크 매니저</span>
+      </div>
+      
+      <div class="header-right">
+        <div class="header-badges">
+          <span id="remainingBadge" class="badge-header badge-remaining" title="미완료 할 일">남은 일 0개</span>
+          <span id="todayCountBadge" class="badge-header badge-today" title="오늘 등록된 할 일">오늘 등록 0개</span>
+        </div>
+        <!-- 테마 전환 토글 버튼 -->
+        <button type="button" id="themeToggle" class="btn-theme-toggle" aria-label="다크/라이트 모드 전환" title="테마 전환">
+          <span class="theme-icon">🌙</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 반응형 2컬럼 메인 레이아웃 (데스크톱 2열 / 모바일 1열) -->
+    <main class="main-layout-grid">
+      <!-- 좌측 사이드바: 대시보드, 등록 폼, 단축키 가이드 -->
+      <aside class="sidebar-panel">
+        <!-- 진행률 대시보드 카드 -->
+        <section class="card dashboard-card">
+          <div class="card-header">
+            <h2 class="card-title">진행 상황 대시보드</h2>
+            <span id="progressSummary" class="progress-summary">0/0 완료 (0%)</span>
+          </div>
+
+          <div class="progress-track" aria-label="전체 진행률">
+            <div id="progressBarFill" class="progress-fill" style="width: 0%;"></div>
+          </div>
+
+          <!-- 카테고리별 미니 통계 그리드 -->
+          <div class="category-stats-grid">
+            <div class="category-stat-card stat-work">
+              <div class="stat-meta">
+                <span class="stat-dot dot-work"></span>
+                <span class="stat-label">업무</span>
+              </div>
+              <span id="statWork" class="stat-value">0/0</span>
+            </div>
+            <div class="category-stat-card stat-personal">
+              <div class="stat-meta">
+                <span class="stat-dot dot-personal"></span>
+                <span class="stat-label">개인</span>
+              </div>
+              <span id="statPersonal" class="stat-value">0/0</span>
+            </div>
+            <div class="category-stat-card stat-study">
+              <div class="stat-meta">
+                <span class="stat-dot dot-study"></span>
+                <span class="stat-label">공부</span>
+              </div>
+              <span id="statStudy" class="stat-value">0/0</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 새 할 일 등록 폼 카드 -->
+        <section class="card form-card">
+          <h2 class="card-title">새 할 일 추가</h2>
+          <form id="todoForm" class="todo-form">
+            <div class="form-inputs-group">
+              <select id="categorySelect" class="category-select" aria-label="카테고리 선택">
+                <option value="work">업무 (Work)</option>
+                <option value="personal">개인 (Personal)</option>
+                <option value="study">공부 (Study)</option>
+              </select>
+              <input 
+                type="text" 
+                id="todoInput" 
+                class="todo-input" 
+                placeholder="오늘 집중할 할 일을 입력하세요... (단축키: Alt+N)" 
+                autocomplete="off"
+                required
+              >
+            </div>
+            <button type="submit" id="addBtn" class="btn btn-add">할 일 추가</button>
+          </form>
+        </section>
+
+        <!-- 단축키 및 사용 팁 카드 -->
+        <section class="card tips-card">
+          <h3 class="tips-title">💡 단축키 & 꿀팁</h3>
+          <ul class="tips-list">
+            <li><kbd>Alt</kbd> + <kbd>N</kbd> : 새 할 일 입력창 포커스</li>
+            <li><kbd>Alt</kbd> + <kbd>1~4</kbd> : 카테고리 필터 전환</li>
+            <li>항목 텍스트를 <strong>더블클릭</strong>하면 인라인으로 수정 가능 (<kbd>Enter</kbd> 저장 / <kbd>ESC</kbd> 취소)</li>
+          </ul>
+        </section>
+      </aside>
+
+      <!-- 우측 메인 패널: 툴바(검색/필터/일괄정리) 및 할 일 목록 -->
+      <section class="content-panel card">
+        <!-- 상단 툴바 컨트롤 -->
+        <div class="task-toolbar">
+          <!-- 카테고리 필터 버튼 그룹 -->
+          <div id="filterButtonGroup" class="filter-group">
+            <button type="button" class="btn-filter active" data-filter="all" title="단축키: Alt+1">전체</button>
+            <button type="button" class="btn-filter" data-filter="work" title="단축키: Alt+2">업무</button>
+            <button type="button" class="btn-filter" data-filter="personal" title="단축키: Alt+3">개인</button>
+            <button type="button" class="btn-filter" data-filter="study" title="단축키: Alt+4">공부</button>
+          </div>
+
+          <!-- 우측 액션: 검색창 및 완료 정리 버튼 -->
+          <div class="toolbar-actions">
+            <div class="search-input-wrapper">
+              <input 
+                type="search" 
+                id="searchInput" 
+                class="search-input" 
+                placeholder="🔍 실시간 검색..." 
+                autocomplete="off"
+              >
+            </div>
+            <button type="button" id="clearCompletedBtn" class="btn btn-clear-completed" title="완료된 할 일을 모두 정리합니다">
+              완료 항목 정리
+            </button>
+          </div>
+        </div>
+
+        <!-- 할 일 목록 영역 -->
+        <div class="todo-list-wrapper">
+          <ul id="todoList" class="todo-list"></ul>
+          <div id="emptyMessage" class="empty-message">할 일이 없습니다. 추가해보세요!</div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
